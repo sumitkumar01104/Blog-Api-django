@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevBlog</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #151820;
+      --surface2: #1c2030;
+      --border: #262c3a;
+      --accent: #7c6af7;
+      --accent2: #56cfad;
+      --text: #e8eaf0;
+      --text2: #8892a4;
+      --text3: #545e70;
+      --danger: #f06a6a;
+      --like: #f97c7c;
+      --radius: 10px;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font: 'Inter', sans-serif;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 18px; font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent2); }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500;
+      border: none; cursor: pointer; font-family: var(--font); transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #6a58e0; }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger)33; }
+    .btn-danger:hover { background: var(--danger)15; }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+    .btn-icon { padding: 6px 10px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* LAYOUT */
+    .container { max-width: 780px; margin: 0 auto; padding: 32px 20px; }
+
+    /* AUTH PAGES */
+    .auth-wrap {
+      min-height: calc(100vh - 60px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 40px;
+      width: 100%; max-width: 420px;
+    }
+    .auth-card h2 {
+      font-size: 22px; font-weight: 600; margin-bottom: 6px;
+    }
+    .auth-card p.sub { color: var(--text2); font-size: 13px; margin-bottom: 28px; }
+
+    /* FORMS */
+    .form-group { margin-bottom: 16px; }
+    label { font-size: 12px; font-weight: 500; color: var(--text2); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type=text], input[type=password], textarea {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text); font-family: var(--font); font-size: 14px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 100px; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    /* ERRORS */
+    .error-msg {
+      background: var(--danger)18;
+      border: 1px solid var(--danger)40;
+      color: var(--danger);
+      border-radius: 7px; padding: 10px 14px;
+      font-size: 13px; margin-bottom: 16px;
+    }
+    .success-msg {
+      background: var(--accent2)18;
+      border: 1px solid var(--accent2)40;
+      color: var(--accent2);
+      border-radius: 7px; padding: 10px 14px;
+      font-size: 13px; margin-bottom: 16px;
+    }
+
+    /* TABS */
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: var(--surface2); border-radius: 9px; padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1; padding: 8px; border-radius: 6px;
+      background: none; border: none; color: var(--text2);
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .tab-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+    /* POST CARDS */
+    .post-list { display: flex; flex-direction: column; gap: 16px; }
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      transition: border-color 0.15s;
+    }
+    .post-card:hover { border-color: var(--accent)60; }
+    .post-meta {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .post-author { font-size: 13px; font-weight: 500; color: var(--text2); }
+    .post-date { font-size: 11px; color: var(--text3); margin-left: auto; font-family: var(--font-mono); }
+    .post-card h3 {
+      font-size: 17px; font-weight: 600; margin-bottom: 8px;
+      cursor: pointer; transition: color 0.15s;
+      line-height: 1.4;
+    }
+    .post-card h3:hover { color: var(--accent); }
+    .post-body { font-size: 14px; color: var(--text2); line-height: 1.65; margin-bottom: 16px; }
+    .post-body.preview {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-clamp: 3;
+    }
+    .post-footer { display: flex; align-items: center; gap: 10px; }
+    .like-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 12px;
+      color: var(--text2); font-size: 13px; cursor: pointer; font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .like-btn:hover, .like-btn.liked { color: var(--like); border-color: var(--like)50; background: var(--like)10; }
+    .comment-count {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--text3); font-size: 13px; cursor: pointer;
+    }
+    .comment-count:hover { color: var(--accent2); }
+    .tag { background: var(--accent)18; color: var(--accent); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-family: var(--font-mono); }
+    .owner-actions { margin-left: auto; display: flex; gap: 8px; }
+
+    /* DETAIL VIEW */
+    .post-detail { max-width: 720px; margin: 0 auto; }
+    .back-btn {
+      background: none; border: none; color: var(--text2); cursor: pointer;
+      font-size: 13px; font-family: var(--font); display: flex; align-items: center; gap: 6px;
+      margin-bottom: 24px; padding: 0;
+    }
+    .back-btn:hover { color: var(--text); }
+    .post-detail h2 { font-size: 26px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+    .post-full-body { font-size: 15px; line-height: 1.8; color: var(--text2); white-space: pre-wrap; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* COMMENTS */
+    .comments-section h4 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text2); }
+    .comment-item {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .comment-author { font-size: 12px; font-weight: 600; color: var(--accent2); }
+    .comment-time { font-size: 11px; color: var(--text3); margin-left: auto; font-family: var(--font-mono); }
+    .comment-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+    .comment-form { margin-top: 20px; display: flex; gap: 10px; }
+    .comment-form textarea { flex: 1; min-height: 60px; }
+
+    /* NEW POST */
+    .new-post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+    .new-post-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+
+    /* HEADER */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border-radius: 7px; padding: 6px 12px;
+    }
+    .user-badge span { font-size: 13px; font-weight: 500; color: var(--text2); }
+    .user-badge .name { color: var(--accent); }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty p { font-size: 14px; }
+
+    /* SPINNER */
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.6s linear infinite; margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 12px 18px;
+      font-size: 13px; color: var(--text);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 999;
+      animation: slideUp 0.2s ease;
+    }
+    .toast.success { border-color: var(--accent2)50; }
+    .toast.error { border-color: var(--danger)50; }
+    @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* CONFIG BANNER */
+    .config-banner {
+      background: var(--accent)18; border: 1px solid var(--accent)40;
+      border-radius: 9px; padding: 14px 18px;
+      font-size: 13px; color: var(--text2);
+      margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+    .config-banner code { font-family: var(--font-mono); color: var(--accent); font-size: 12px; }
+
+
+
+    @media (max-width: 600px) {
+      .auth-card { padding: 28px 20px; }
+      .form-row { flex-direction: column; }
+      nav { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ==================== STATE ====================
+let state = {
+  view: 'login',           // login | register | feed | detail | my-posts | new-post
+  token: localStorage.getItem('access') || null,
+  refresh: localStorage.getItem('refresh') || null,
+  user: localStorage.getItem('user') || null,
+  posts: [],
+  currentPost: null,
+  loading: false,
+  error: null,
+  success: null,
+  apiBase: localStorage.getItem('apiBase') || 'http://127.0.0.1:8000',
+  toast: null,
+  editingPost: null,
+};
+
+// ==================== API ====================
+async function api(method, path, body = null, auth = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth && state.token) headers['Authorization'] = `Bearer ${state.token}`;
+
+  const res = await fetch(state.apiBase + path, {
+    method, headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+
+  if (res.status === 401 && state.refresh) {
+    // Try token refresh
+    try {
+      const r = await fetch(state.apiBase.replace('/api','') + '/api/token/refresh/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: state.refresh })
+      });
+      if (r.ok) {
+        const d = await r.json();
+        state.token = d.access;
+        localStorage.setItem('access', d.access);
+        headers['Authorization'] = `Bearer ${d.access}`;
+        const retry = await fetch(state.apiBase + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        return retry;
+      }
+    } catch {}
+    logout();
+    return res;
+  }
+  return res;
+}
+
+async function logout() {
+  if (state.refresh) {
+    try { await api('POST', '/logout/', { refresh: state.refresh }); } catch {}
+  }
+  state.token = null; state.refresh = null; state.user = null;
+  localStorage.removeItem('access'); localStorage.removeItem('refresh'); localStorage.removeItem('user');
+  navigate('login');
+}
+
+// ==================== ROUTER ====================
+function navigate(view, data = null) {
+  state.view = view;
+  state.error = null; state.success = null;
+  if (data) Object.assign(state, data);
+  render();
+}
+
+function showToast(msg, type = 'success') {
+  state.toast = { msg, type };
+  render();
+  setTimeout(() => { state.toast = null; render(); }, 3000);
+}
+
+// ==================== AUTH ====================
+async function handleLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const username = form.username.value.trim();
+  const password = form.password.value;
+  state.loading = true; state.error = null; render();
+
+  try {
+    const res = await fetch(state.apiBase.replace('/api','') + '/api/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed');
+    state.token = data.access; state.refresh = data.refresh; state.user = username;
+    localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    localStorage.setItem('user', username);
+    state.loading = false;
+    navigate('feed');
+    loadPosts();
+  } catch (err) {
+    state.error = err.message; state.loading = false; render();
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const username = form.username.value.trim();
+  const password = form.password.value;
+  state.loading = true; state.error = null; render();
+
+  try {
+    const res = await api('POST', '/register/', { username, password }, false);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    state.success = 'Account created! Ab login karo.'; state.loading = false; render();
+    setTimeout(() => navigate('login'), 1500);
+  } catch (err) {
+    state.error = err.message; state.loading = false; render();
+  }
+}
+
+// ==================== POSTS ====================
+async function loadPosts() {
+  state.loading = true; render();
+  try {
+    const res = await api('GET', '/blog/');
+    const data = await res.json();
+    state.posts = Array.isArray(data) ? data : (data.results || []);
+    state.loading = false; render();
+  } catch {
+    state.loading = false; state.error = 'Posts load nahi hue. API running hai?'; render();
+  }
+}
+
+async function loadMyPosts() {
+  state.loading = true; render();
+  try {
+    const res = await api('GET', `/blog/user/${state.user}/`);
+    const data = await res.json();
+    state.posts = Array.isArray(data) ? data : (data.results || []);
+    state.loading = false; render();
+  } catch {
+    state.loading = false; state.error = 'Posts load nahi hue.'; render();
+  }
+}
+
+async function createPost(e) {
+  e.preventDefault();
+  const form = e.target;
+  const title = form.title.value.trim();
+  const content = form.content.value.trim();
+  if (!title || !content) return;
+  state.loading = true; state.error = null; render();
+
+  try {
+    const res = await api('POST', '/blog/', { title, content });
+    if (!res.ok) throw new Error('Post create nahi hua');
+    showToast('Post published! 🎉');
+    navigate('feed'); loadPosts();
+  } catch (err) {
+    state.error = err.message; state.loading = false; render();
+  }
+}
+
+async function updatePost(e) {
+  e.preventDefault();
+  const form = e.target;
+  const title = form.title.value.trim();
+  const content = form.content.value.trim();
+  state.loading = true; render();
+  try {
+    const res = await api('PUT', `/blog/${state.editingPost.id}/`, { title, content });
+    if (!res.ok) throw new Error('Update failed');
+    showToast('Post updated!');
+    navigate('feed'); loadPosts();
+  } catch (err) {
+    state.error = err.message; state.loading = false; render();
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm('Is post ko delete karna chahte ho?')) return;
+  try {
+    await api('DELETE', `/blog/${id}/`);
+    state.posts = state.posts.filter(p => p.id !== id);
+    if (state.view === 'detail') navigate('feed');
+    showToast('Post deleted.');
+    render();
+  } catch { showToast('Delete nahi hua', 'error'); }
+}
+
+async function toggleLike(postId) {
+  try {
+    const res = await api('POST', `/blog/${postId}/like/`);
+    const data = await res.json();
+    // Reload to get updated count
+    if (state.view === 'detail') {
+      const r2 = await api('GET', `/blog/${postId}/`);
+      // API might not have single-post endpoint, reload all
+    }
+    await loadPostsQuiet();
+    if (state.currentPost && state.currentPost.id === postId) {
+      state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
+    }
+    showToast(data.message || 'Done!');
+  } catch { showToast('Like toggle nahi hua', 'error'); }
+}
+
+async function loadPostsQuiet() {
+  try {
+    const res = await api('GET', '/blog/');
+    const data = await res.json();
+    state.posts = Array.isArray(data) ? data : (data.results || []);
+    render();
+  } catch {}
+}
+
+async function addComment(postId, content) {
+  try {
+    const res = await api('POST', `/blog/${postId}/comment/`, { content });
+    if (!res.ok) throw new Error('Comment add nahi hua');
+    await loadPostsQuiet();
+    state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
+    showToast('Comment added!');
+    render();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function deleteComment(commentId, postId) {
+  try {
+    await api('DELETE', `/comment/${commentId}/delete/`);
+    await loadPostsQuiet();
+    state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
+    showToast('Comment deleted.');
+    render();
+  } catch { showToast('Delete nahi hua', 'error'); }
+}
+
+// ==================== HELPERS ====================
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+
+function initials(name) {
+  return (name || '?').substring(0, 2).toUpperCase();
+}
+
+function escHtml(str) {
+  const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML;
+}
+
+// ==================== RENDER ====================
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = buildHTML();
+  attachEvents();
+}
+
+function buildHTML() {
+  let content = '';
+  const isAuthed = !!state.token;
+  const nav = isAuthed ? `
+    <nav>
+      <div class="nav-logo">dev<span>blog</span></div>
+      <div class="nav-right">
+        <div class="user-badge"><span>Hi, </span><span class="name">${escHtml(state.user)}</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('feed'); loadPosts()">Feed</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('my-posts'); loadMyPosts()">My Posts</button>
+        <button class="btn btn-primary btn-sm" onclick="navigate('new-post')">+ New</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </nav>` : `
+    <nav>
+      <div class="nav-logo">dev<span>blog</span></div>
+      <div class="nav-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigate('login')">Login</button>
+        <button class="btn btn-primary btn-sm" onclick="navigate('register')">Register</button>
+      </div>
+    </nav>`;
+
+  if (state.view === 'login') content = buildLogin();
+  else if (state.view === 'register') content = buildRegister();
+  else if (state.view === 'feed') content = buildFeed();
+  else if (state.view === 'detail') content = buildDetail();
+  else if (state.view === 'my-posts') content = buildMyPosts();
+  else if (state.view === 'new-post') content = buildNewPost();
+  else if (state.view === 'edit-post') content = buildEditPost();
+
+  const toast = state.toast ? `<div class="toast ${state.toast.type}">${escHtml(state.toast.msg)}</div>` : '';
+
+  return nav + `<div class="container">${content}</div>` + toast;
+}
+
+
+
+function buildLogin() {
+  return `
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h2>Welcome back</h2>
+        <p class="sub">Apne account mein login karo</p>
+        ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+        ${state.success ? `<div class="success-msg">${escHtml(state.success)}</div>` : ''}
+        <form id="login-form">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="yourname" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" required />
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:4px" type="submit" ${state.loading ? 'disabled' : ''}>
+            ${state.loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+        <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text3)">
+          Account nahi hai? 
+          <a href="#" onclick="navigate('register')" style="color:var(--accent);text-decoration:none">Register karo</a>
+        </p>
+      </div>
+    </div>`;
+}
+
+function buildRegister() {
+  return `
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="sub">Naya account banao aur likhna shuru karo</p>
+        ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+        ${state.success ? `<div class="success-msg">${escHtml(state.success)}</div>` : ''}
+        <form id="register-form">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="yourname" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Min 8 chars" required />
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:4px" type="submit" ${state.loading ? 'disabled' : ''}>
+            ${state.loading ? 'Creating...' : 'Create Account'}
+          </button>
+        </form>
+        <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text3)">
+          Pehle se account hai? 
+          <a href="#" onclick="navigate('login')" style="color:var(--accent);text-decoration:none">Login karo</a>
+        </p>
+      </div>
+    </div>`;
+}
+
+function buildFeed() {
+  return `
+    <div class="page-header">
+      <h1>All Posts</h1>
+      <button class="btn btn-primary btn-sm" onclick="navigate('new-post')">+ Write Post</button>
+    </div>
+    ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+    ${state.loading ? '<div class="spinner"></div>' : buildPostList(state.posts)}`;
+}
+
+function buildMyPosts() {
+  return `
+    <div class="page-header">
+      <h1>My Posts</h1>
+      <button class="btn btn-primary btn-sm" onclick="navigate('new-post')">+ Write Post</button>
+    </div>
+    ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+    ${state.loading ? '<div class="spinner"></div>' : buildPostList(state.posts, true)}`;
+}
+
+function buildPostList(posts, showOwnerActions = false) {
+  if (!posts.length) return `<div class="empty"><div class="empty-icon">📝</div><p>Koi post nahi hai abhi</p></div>`;
+  return `<div class="post-list">${posts.map(p => buildPostCard(p, showOwnerActions)).join('')}</div>`;
+}
+
+function buildPostCard(post, showOwnerActions = false) {
+  const isOwner = post.author === state.user;
+  const commentCount = post.comments ? post.comments.length : 0;
+  return `
+    <div class="post-card">
+      <div class="post-meta">
+        <div class="avatar">${initials(post.author)}</div>
+        <span class="post-author">${escHtml(post.author)}</span>
+        <span class="post-date">${timeAgo(post.created_at)}</span>
+      </div>
+      <h3 onclick="openPost(${post.id})">${escHtml(post.title)}</h3>
+      <div class="post-body preview">${escHtml(post.content)}</div>
+      <div class="post-footer">
+        <button class="like-btn" onclick="toggleLike(${post.id})">
+          ♥ ${post.total_likes || 0}
+        </button>
+        <span class="comment-count" onclick="openPost(${post.id})">
+          💬 ${commentCount}
+        </span>
+        <span class="tag">post</span>
+        ${(showOwnerActions && isOwner) ? `
+          <div class="owner-actions">
+            <button class="btn btn-ghost btn-sm" onclick="editPost(${post.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePost(${post.id})">Delete</button>
+          </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function buildDetail() {
+  const post = state.currentPost;
+  if (!post) return '<div class="empty"><p>Post nahi mili</p></div>';
+  const isOwner = post.author === state.user;
+  const comments = post.comments || [];
+  return `
+    <div class="post-detail">
+      <button class="back-btn" onclick="navigate('feed'); loadPosts()">← Back to Feed</button>
+      <div class="post-meta">
+        <div class="avatar">${initials(post.author)}</div>
+        <span class="post-author">${escHtml(post.author)}</span>
+        <span class="post-date">${timeAgo(post.created_at)}</span>
+        ${isOwner ? `
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="editPost(${post.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePost(${post.id})">Delete</button>
+          </div>` : ''}
+      </div>
+      <h2>${escHtml(post.title)}</h2>
+      <hr class="divider" />
+      <div class="post-full-body">${escHtml(post.content)}</div>
+      <hr class="divider" />
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="like-btn" onclick="toggleLike(${post.id})">♥ ${post.total_likes || 0} Likes</button>
+        <span style="color:var(--text3);font-size:13px">💬 ${comments.length} Comments</span>
+      </div>
+      <hr class="divider" />
+      <div class="comments-section">
+        <h4>Comments (${comments.length})</h4>
+        ${comments.length ? comments.map(c => `
+          <div class="comment-item">
+            <div class="comment-header">
+              <div class="avatar" style="width:22px;height:22px;font-size:10px">${initials(c.author)}</div>
+              <span class="comment-author">${escHtml(c.author)}</span>
+              <span class="comment-time">${timeAgo(c.created_at)}</span>
+              ${c.author === state.user ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteComment(${c.id}, ${post.id})" style="margin-left:8px">✕</button>` : ''}
+            </div>
+            <div class="comment-text">${escHtml(c.content)}</div>
+          </div>`).join('') : '<p style="color:var(--text3);font-size:13px">Koi comment nahi. Pehle comment karo!</p>'}
+        <div class="comment-form" id="comment-form">
+          <textarea id="comment-input" placeholder="Apna comment likho..."></textarea>
+          <button class="btn btn-primary" onclick="submitComment(${post.id})">Post</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildNewPost() {
+  return `
+    <div class="new-post-card">
+      <h3>✍️ New Post</h3>
+      ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+      <form id="new-post-form">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" name="title" placeholder="Post ka title..." required />
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea name="content" placeholder="Apne thoughts likhoo..." rows="8" required></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn btn-primary" type="submit" ${state.loading ? 'disabled' : ''}>
+            ${state.loading ? 'Publishing...' : 'Publish Post'}
+          </button>
+          <button class="btn btn-ghost" type="button" onclick="navigate('feed'); loadPosts()">Cancel</button>
+        </div>
+      </form>
+    </div>`;
+}
+
+function buildEditPost() {
+  const p = state.editingPost;
+  if (!p) return '';
+  return `
+    <div class="new-post-card">
+      <h3>✏️ Edit Post</h3>
+      ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
+      <form id="edit-post-form">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" name="title" value="${escHtml(p.title)}" required />
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea name="content" rows="8" required>${escHtml(p.content)}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn btn-primary" type="submit" ${state.loading ? 'disabled' : ''}>
+            ${state.loading ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button class="btn btn-ghost" type="button" onclick="navigate('feed'); loadPosts()">Cancel</button>
+        </div>
+      </form>
+    </div>`;
+}
+
+// ==================== EVENTS ====================
+function attachEvents() {
+  const lf = document.getElementById('login-form');
+  if (lf) lf.addEventListener('submit', handleLogin);
+
+  const rf = document.getElementById('register-form');
+  if (rf) rf.addEventListener('submit', handleRegister);
+
+  const nf = document.getElementById('new-post-form');
+  if (nf) nf.addEventListener('submit', createPost);
+
+  const ef = document.getElementById('edit-post-form');
+  if (ef) ef.addEventListener('submit', updatePost);
+}
+
+function openPost(id) {
+  const post = state.posts.find(p => p.id === id);
+  if (post) { state.currentPost = post; navigate('detail'); }
+}
+
+function editPost(id) {
+  const post = state.posts.find(p => p.id === id);
+  if (post) { state.editingPost = post; navigate('edit-post'); }
+}
+
+function submitComment(postId) {
+  const input = document.getElementById('comment-input');
+  const content = input ? input.value.trim() : '';
+  if (!content) return;
+  input.value = '';
+  addComment(postId, content);
+}
+
+function updateApiBase() {
+  const input = document.getElementById('api-base-input');
+  if (input) {
+    state.apiBase = input.value.trim().replace(/\/$/, '');
+    localStorage.setItem('apiBase', state.apiBase);
+    showToast('API base updated!');
+  }
+}
+
+// ==================== INIT ====================
+if (state.token) {
+  navigate('feed');
+  loadPosts();
+} else {
+  navigate('login');
+}
+</script>
+</body>
+</html>
