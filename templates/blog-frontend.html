@@ -389,7 +389,7 @@ async function handleRegister(e) {
     const res = await api('POST', '/register/', { username, password }, false);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
-    state.success = 'Account created! Ab login karo.'; state.loading = false; render();
+    state.success = 'Account created! Please login now.'; state.loading = false; render();
     setTimeout(() => navigate('login'), 1500);
   } catch (err) {
     state.error = err.message; state.loading = false; render();
@@ -405,7 +405,7 @@ async function loadPosts() {
     state.posts = Array.isArray(data) ? data : (data.results || []);
     state.loading = false; render();
   } catch {
-    state.loading = false; state.error = 'Posts load nahi hue. API running hai?'; render();
+    state.loading = false; state.error = 'Could not load posts. Is the API running?'; render();
   }
 }
 
@@ -417,7 +417,7 @@ async function loadMyPosts() {
     state.posts = Array.isArray(data) ? data : (data.results || []);
     state.loading = false; render();
   } catch {
-    state.loading = false; state.error = 'Posts load nahi hue.'; render();
+    state.loading = false; state.error = 'Could not load posts.'; render();
   }
 }
 
@@ -431,7 +431,7 @@ async function createPost(e) {
 
   try {
     const res = await api('POST', '/blog/', { title, content });
-    if (!res.ok) throw new Error('Post create nahi hua');
+    if (!res.ok) throw new Error('Could not create post');
     showToast('Post published! 🎉');
     navigate('feed'); loadPosts();
   } catch (err) {
@@ -456,14 +456,14 @@ async function updatePost(e) {
 }
 
 async function deletePost(id) {
-  if (!confirm('Is post ko delete karna chahte ho?')) return;
+  if (!confirm('Are you sure you want to delete this post?')) return;
   try {
     await api('DELETE', `/blog/${id}/`);
     state.posts = state.posts.filter(p => p.id !== id);
     if (state.view === 'detail') navigate('feed');
     showToast('Post deleted.');
     render();
-  } catch { showToast('Delete nahi hua', 'error'); }
+  } catch { showToast('Delete failed', 'error'); }
 }
 
 async function toggleLike(postId) {
@@ -480,7 +480,7 @@ async function toggleLike(postId) {
       state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
     }
     showToast(data.message || 'Done!');
-  } catch { showToast('Like toggle nahi hua', 'error'); }
+  } catch { showToast('Could not toggle like', 'error'); }
 }
 
 async function loadPostsQuiet() {
@@ -495,7 +495,7 @@ async function loadPostsQuiet() {
 async function addComment(postId, content) {
   try {
     const res = await api('POST', `/blog/${postId}/comment/`, { content });
-    if (!res.ok) throw new Error('Comment add nahi hua');
+    if (!res.ok) throw new Error('Could not add comment');
     await loadPostsQuiet();
     state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
     showToast('Comment added!');
@@ -510,7 +510,7 @@ async function deleteComment(commentId, postId) {
     state.currentPost = state.posts.find(p => p.id === postId) || state.currentPost;
     showToast('Comment deleted.');
     render();
-  } catch { showToast('Delete nahi hua', 'error'); }
+  } catch { showToast('Delete failed', 'error'); }
 }
 
 // ==================== HELPERS ====================
@@ -581,7 +581,7 @@ function buildLogin() {
     <div class="auth-wrap">
       <div class="auth-card">
         <h2>Welcome back</h2>
-        <p class="sub">Apne account mein login karo</p>
+        <p class="sub">Log in to your account</p>
         ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
         ${state.success ? `<div class="success-msg">${escHtml(state.success)}</div>` : ''}
         <form id="login-form">
@@ -598,8 +598,8 @@ function buildLogin() {
           </button>
         </form>
         <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text3)">
-          Account nahi hai? 
-          <a href="#" onclick="navigate('register')" style="color:var(--accent);text-decoration:none">Register karo</a>
+          Don't have an account? 
+          <a href="#" onclick="navigate('register')" style="color:var(--accent);text-decoration:none">Register here</a>
         </p>
       </div>
     </div>`;
@@ -610,7 +610,7 @@ function buildRegister() {
     <div class="auth-wrap">
       <div class="auth-card">
         <h2>Create Account</h2>
-        <p class="sub">Naya account banao aur likhna shuru karo</p>
+        <p class="sub">Create a new account and start writing</p>
         ${state.error ? `<div class="error-msg">${escHtml(state.error)}</div>` : ''}
         ${state.success ? `<div class="success-msg">${escHtml(state.success)}</div>` : ''}
         <form id="register-form">
@@ -627,8 +627,8 @@ function buildRegister() {
           </button>
         </form>
         <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text3)">
-          Pehle se account hai? 
-          <a href="#" onclick="navigate('login')" style="color:var(--accent);text-decoration:none">Login karo</a>
+          Already have an account? 
+          <a href="#" onclick="navigate('login')" style="color:var(--accent);text-decoration:none">Login here</a>
         </p>
       </div>
     </div>`;
@@ -655,7 +655,7 @@ function buildMyPosts() {
 }
 
 function buildPostList(posts, showOwnerActions = false) {
-  if (!posts.length) return `<div class="empty"><div class="empty-icon">📝</div><p>Koi post nahi hai abhi</p></div>`;
+  if (!posts.length) return `<div class="empty"><div class="empty-icon">📝</div><p>No posts yet</p></div>`;
   return `<div class="post-list">${posts.map(p => buildPostCard(p, showOwnerActions)).join('')}</div>`;
 }
 
@@ -690,7 +690,7 @@ function buildPostCard(post, showOwnerActions = false) {
 
 function buildDetail() {
   const post = state.currentPost;
-  if (!post) return '<div class="empty"><p>Post nahi mili</p></div>';
+  if (!post) return '<div class="empty"><p>Post not found</p></div>';
   const isOwner = post.author === state.user;
   const comments = post.comments || [];
   return `
@@ -726,9 +726,9 @@ function buildDetail() {
               ${c.author === state.user ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteComment(${c.id}, ${post.id})" style="margin-left:8px">✕</button>` : ''}
             </div>
             <div class="comment-text">${escHtml(c.content)}</div>
-          </div>`).join('') : '<p style="color:var(--text3);font-size:13px">Koi comment nahi. Pehle comment karo!</p>'}
+          </div>`).join('') : '<p style="color:var(--text3);font-size:13px">No comments yet. Be the first to comment!</p>'}
         <div class="comment-form" id="comment-form">
-          <textarea id="comment-input" placeholder="Apna comment likho..."></textarea>
+          <textarea id="comment-input" placeholder="Write your comment..."></textarea>
           <button class="btn btn-primary" onclick="submitComment(${post.id})">Post</button>
         </div>
       </div>
@@ -743,11 +743,11 @@ function buildNewPost() {
       <form id="new-post-form">
         <div class="form-group">
           <label>Title</label>
-          <input type="text" name="title" placeholder="Post ka title..." required />
+          <input type="text" name="title" placeholder="Post title..." required />
         </div>
         <div class="form-group">
           <label>Content</label>
-          <textarea name="content" placeholder="Apne thoughts likhoo..." rows="8" required></textarea>
+          <textarea name="content" placeholder="Write your thoughts..." rows="8" required></textarea>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px">
           <button class="btn btn-primary" type="submit" ${state.loading ? 'disabled' : ''}>
