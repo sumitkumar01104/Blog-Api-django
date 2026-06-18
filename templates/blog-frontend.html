@@ -289,7 +289,7 @@ let state = {
   loading: false,
   error: null,
   success: null,
-  apiBase: localStorage.getItem('apiBase') || 'http://127.0.0.1:8000',
+  apiBase: localStorage.getItem('apiBase') || window.location.origin,
   toast: null,
   editingPost: null,
 };
