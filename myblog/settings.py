@@ -100,7 +100,7 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT', default='5432'),
-        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+                'OPTIONS': {'sslmode': config('DB_SSLMODE', default='prefer')},
     }
 }
 
