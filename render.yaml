@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: blog-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
+    startCommand: gunicorn myblog.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      # Neon/Supabase connection string - set in Render dashboard
+      - key: DATABASE_URL
+        sync: false
